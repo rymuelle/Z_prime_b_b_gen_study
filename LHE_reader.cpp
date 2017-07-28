@@ -17,14 +17,22 @@ using namespace std ;
 int main(int argc, char ** argv) 
 {
 
+
   int maxEvents = 10;
   std::ifstream ifs (argv[1]) ;
+  
 
   LHEF::Reader reader (ifs) ;
 
+  int verbosity = atoi(argv[2]);
   int i = 0;
   TLorentzVector mu_neg;
   TLorentzVector mu_pos;
+
+  TH1F * TH1F_eta_bjet = new TH1F("TH1F_eta_bjet", "TH1F_eta_bjet; #eta", 100, -4, 4);
+
+  TCanvas * c1 = new TCanvas();
+
 
   while (reader.readEvent ()) 
     {
@@ -53,44 +61,21 @@ int main(int argc, char ** argv)
                 reader.hepeup.PUP.at (iPart).at (3) // E
               );
            }
-
-          /*  //std::cout << "clustering: " << reader.hepeup.clustering[iPart].p1 << " " << reader.hepeup.clustering[iPart].p2 << " " << reader.hepeup.clustering[iPart].p0 << " " << reader.hepeup.clustering[iPart].scale << " " << reader.hepeup.clustering[iPart].alphas <<  std::endl;
-           TLorentzVector boost (
-                reader.hepeup.PUP.at (iPart).at (0), // px
-                reader.hepeup.PUP.at (iPart).at (1), // py
-                reader.hepeup.PUP.at (iPart).at (2), // pz
-                reader.hepeup.PUP.at (iPart).at (3) // E
-              ) ; 
-
-            if(reader.hepeup.IDUP.at (iPart) == 1000006 and reader.hepeup.ISTUP.at (iPart) == 1) 
-            {
-                reader.hepeup.ISTUP.at (iPart) = 2;
-
-                if(reader2.readEvent())
-                {
-                       reader.hepeup.addHEPUP(reader2.hepeup, boost.BoostVector(), iPart);
-                        std::cout << iPart << std::endl;
-                }
-
-            }
-
-            if(reader.hepeup.IDUP.at (iPart) == -1000006)
-            {
-                reader.hepeup.ISTUP.at (iPart) = 2;
-                if(reader2.readEvent())
-                {
-                       reader.hepeup.addHEPUP(reader2.hepeup, boost.BoostVector(), iPart);
-                        std::cout << iPart << std::endl;
-                }
-            }*/
           
 
-            std::cout << reader.hepeup.IDUP.at (iPart) << std::endl;            
+            if(verbosity > 10) {std::cout << reader.hepeup.IDUP.at (iPart) << std::endl;}            
         }
-        std::cout << mu_neg.Phi() << std::endl;
+        if(verbosity > 10) {std::cout << "mass of di muon " << (mu_pos+mu_neg ).M() << std::endl;}
+        TH1F_eta_bjet->Fill(mu_pos.Eta());
+        TH1F_eta_bjet->Fill(mu_neg.Eta());
+
+
 
    
     }
+    TH1F_eta_bjet->Draw();
+    c1->SaveAs("output/TH1F_eta_bjet.png");
+
 
 
 return 0;
